@@ -5,12 +5,13 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
+import { orderDummyDataType } from "@/interface/Index";
 
 const Orders = () => {
 
     const { currency } = useAppContext();
 
-    const [orders, setOrders] = useState([]);
+    const [orders, setOrders] = useState<orderDummyDataType[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchSellerOrders = async () => {

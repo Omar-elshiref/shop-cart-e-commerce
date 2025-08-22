@@ -6,12 +6,13 @@ import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Loading from "@/components/Loading";
+import { orderDummyDataType } from "@/interface/Index";
 
 const MyOrders = () => {
 
     const { currency } = useAppContext();
 
-    const [orders, setOrders] = useState([]);
+    const [orders, setOrders] = useState<orderDummyDataType[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchOrders = async () => {

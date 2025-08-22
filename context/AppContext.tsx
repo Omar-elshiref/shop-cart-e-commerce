@@ -1,0 +1,141 @@
+'use client'
+import { productsDummyData, userDummyData } from "@/assets/assets";
+import { useRouter } from "next/navigation";
+import { createContext, useContext, useEffect, useState, PropsWithChildren } from "react";
+import { useUser } from "@clerk/nextjs";
+import { ProductType, User } from "@/interface/Index";
+
+
+type AppContextValue = {
+  user: User | null;
+  currency: string;
+  router: ReturnType<typeof useRouter> | null;
+  isSeller: boolean;
+    userData: User | undefined;
+  products: ProductType[];
+  cartItems: { [key: string]: number };
+  setIsSeller: (isSeller: boolean) => void;
+  fetchUserData: () => Promise<void>;
+  fetchProductData: () => Promise<void>;
+  setCartItems: (cartItems: { [key: string]: number }) => void;
+  updateCartQuantity: (productId: string, quantity: number) => Promise<void>;
+  addToCart: (productId: string) => Promise<void>;
+  getCartCount: () => number;
+  getCartAmount: () => number;
+}
+
+const defaultValue: AppContextValue = {
+  user: null,
+  currency: '',
+  router: null,
+  isSeller: false,
+  userData: userDummyData,
+  products: productsDummyData,
+  cartItems: {},
+  setIsSeller: () => {},
+  fetchUserData: async () => {},
+  fetchProductData: async () => {},
+  setCartItems: () => {},
+  updateCartQuantity: async () => {},
+  addToCart: async () => {},
+  getCartCount: () => 0,
+  getCartAmount: () => 0,
+};
+
+export const AppContext = createContext(defaultValue);
+
+export const useAppContext = () => {
+    return useContext(AppContext)
+}
+
+export const AppContextProvider = (props: PropsWithChildren<{ children: React.ReactNode }>) => {
+
+    const currency = process.env.NEXT_PUBLIC_CURRENCY ?? 'USD'
+    const router = useRouter()
+
+    const { user } = useUser()
+
+    const [products, setProducts] = useState<ProductType[]>([])
+    const [userData, setUserData] = useState<User>()
+    const [isSeller, setIsSeller] = useState(true)
+    const [cartItems, setCartItems] = useState<{ [key: string]: number }>({})
+
+    const fetchProductData = async () => {
+        setProducts(productsDummyData)
+    }
+
+    const fetchUserData = async () => {
+        setUserData(userDummyData)
+    }
+
+    const addToCart = async (itemId: string) => {
+
+        const cartData = structuredClone(cartItems);
+        if (cartData[itemId]) {
+            cartData[itemId] += 1;
+        }
+        else {
+            cartData[itemId] = 1;
+        }
+        setCartItems(cartData);
+
+    }
+
+    const updateCartQuantity = async (itemId: string, quantity: number) => {
+
+        const cartData = structuredClone(cartItems);
+        if (quantity === 0) {
+            delete cartData[itemId];
+        } else {
+            cartData[itemId] = quantity;
+        }
+        setCartItems(cartData)
+
+    }
+
+    const getCartCount = () => {
+        let totalCount = 0;
+        for (const items in cartItems) {
+            if (cartItems[items] > 0) {
+                totalCount += cartItems[items];
+            }
+        }
+        return totalCount;
+    }
+
+  const getCartAmount = () => {
+    let totalAmount = 0;
+    for (const items in cartItems) {
+        const itemInfo = products.find((product) => product._id === items);
+        if (itemInfo && cartItems[items] > 0) {
+            totalAmount += itemInfo.offerPrice * cartItems[items];
+        }
+    }
+    return Math.floor(totalAmount * 100) / 100;
+}
+
+    useEffect(() => {
+        fetchProductData()
+    }, [])
+
+    useEffect(() => {
+        fetchUserData()
+    }, [])
+
+    const value: AppContextValue = {
+        user: user as User | null,
+        currency, router,
+        isSeller, setIsSeller,
+        userData, fetchUserData,
+        products, fetchProductData,
+        cartItems, setCartItems,
+        addToCart, updateCartQuantity,
+        getCartCount, getCartAmount
+    }
+
+    return (
+        <AppContext.Provider value={value}>
+            {props.children}
+        </AppContext.Provider>
+    )
+}
