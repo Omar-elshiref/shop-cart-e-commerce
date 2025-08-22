@@ -13,7 +13,7 @@ const Navbar = () => {
     <nav className='flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b border-gray-300 text-gray-700'>
       <Image
         className='cursor-pointer w-28 md:w-32'
-        onClick={() => router.push("/")}
+        onClick={() => router?.push("/")}
         src={assets.logo}
         alt='logo'
       />
@@ -33,7 +33,7 @@ const Navbar = () => {
 
         {isSeller && (
           <button
-            onClick={() => router.push("/seller")}
+            onClick={() => router?.push("/seller")}
             className='text-xs border px-4 py-1.5 rounded-full'>
             Seller Dashboard
           </button>
@@ -46,16 +46,16 @@ const Navbar = () => {
           <>
             <UserButton>
               <UserButton.MenuItems>
-                <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router.push('/cart')} />
+                <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router?.push('/cart')} />
               </UserButton.MenuItems>
               <UserButton.MenuItems>
-                <UserButton.Action label="My Orders" labelIcon={<BagIcon />} onClick={() => router.push('/my-orders')} />
+                <UserButton.Action label="My Orders" labelIcon={<BagIcon />} onClick={() => router?.push('/my-orders')} />
               </UserButton.MenuItems>
             </UserButton>
           </>
         ) : (
           <button
-            onClick={openSignIn}
+            onClick={() => openSignIn()}
             className='flex items-center gap-2 hover:text-gray-900 transition'>
             <Image src={assets.user_icon} alt='user icon' />
             Account
@@ -66,7 +66,7 @@ const Navbar = () => {
       <div className='flex items-center md:hidden gap-3'>
         {isSeller && (
           <button
-            onClick={() => router.push("/seller")}
+            onClick={() => router?.push("/seller")}
             className='text-xs border px-4 py-1.5 rounded-full'>
             Seller Dashboard
           </button>
@@ -75,22 +75,22 @@ const Navbar = () => {
           <>
             <UserButton>
               <UserButton.MenuItems>
-                <UserButton.Action label="Home" labelIcon={<HomeIcon />} onClick={() => router.push('/')} />
+                <UserButton.Action label="Home" labelIcon={<HomeIcon />} onClick={() => router?.push('/')} />
               </UserButton.MenuItems>
               <UserButton.MenuItems>
-                <UserButton.Action label="Products" labelIcon={<BoxIcon />} onClick={() => router.push('/all-products')} />
+                <UserButton.Action label="Products" labelIcon={<BoxIcon />} onClick={() => router?.push('/all-products')} />
               </UserButton.MenuItems>
               <UserButton.MenuItems>
-                <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router.push('/cart')} />
+                <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router?.push('/cart')} />
               </UserButton.MenuItems>
               <UserButton.MenuItems>
-                <UserButton.Action label="My Orders" labelIcon={<BagIcon />} onClick={() => router.push('/my-orders')} />
+                <UserButton.Action label="My Orders" labelIcon={<BagIcon />} onClick={() => router?.push('/my-orders')} />
               </UserButton.MenuItems>
             </UserButton>
           </>
         ) : (
           <button
-            onClick={openSignIn}
+            onClick={() => openSignIn()}
             className='flex items-center gap-2 hover:text-gray-900 transition'>
             <Image src={assets.user_icon} alt='user icon' />
             Account

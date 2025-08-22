@@ -1,20 +1,21 @@
 import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
+import { addressDummyDataType } from "@/interface/Index";
 
 const OrderSummary = () => {
 
   const { currency, router, getCartCount, getCartAmount } = useAppContext()
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState<addressDummyDataType | null>(null);;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const [userAddresses, setUserAddresses] = useState([]);
+  const [userAddresses, setUserAddresses] = useState<addressDummyDataType[]>([]);;
 
   const fetchUserAddresses = async () => {
     setUserAddresses(addressDummyData);
   }
 
-  const handleAddressSelect = (address) => {
+  const handleAddressSelect = (address: addressDummyDataType) => {
     setSelectedAddress(address);
     setIsDropdownOpen(false);
   };
@@ -67,7 +68,7 @@ const OrderSummary = () => {
                   </li>
                 ))}
                 <li
-                  onClick={() => router.push("/add-address")}
+                  onClick={() => router?.push("/add-address")}
                   className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer text-center"
                 >
                   + Add New Address
