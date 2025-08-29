@@ -125,15 +125,16 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
 }
 
     useEffect(() => {
+        fetchProductData();
+        
+    }, [])
+
+    useEffect(() => {
         if (user) {
 
             fetchProductData()
         }
     }, [user])
-
-    useEffect(() => {
-        fetchUserData()
-    }, [])
 
     const value: AppContextValue = {
         user: user as User | null,
