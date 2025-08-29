@@ -62,7 +62,7 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
 
 
     const [products, setProducts] = useState<ProductType[]>([])
-    const [userData, setUserData] = useState<User>()
+    const [userData, setUserData] = useState<User>(false as unknown as User)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState<{ [key: string]: number }>({})
 
