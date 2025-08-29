@@ -16,7 +16,7 @@ async function connectDB() {
             bufferCommands: false,
         };
 
-        cached.promise = mongoose.connect(`${process.env.MONGODB_URI}/shopCart E-commerce2`, opts).then((mongoose) => {
+        cached.promise = mongoose.connect(`${process.env.MONGODB_URI}/shopCartEcommerce2`, opts).then((mongoose) => {
             return mongoose
         });
     }
