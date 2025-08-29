@@ -57,15 +57,25 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
 
     const [products, setProducts] = useState<ProductType[]>([])
     const [userData, setUserData] = useState<User>()
-    const [isSeller, setIsSeller] = useState(true)
+    const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState<{ [key: string]: number }>({})
 
     const fetchProductData = async () => {
+       
         setProducts(productsDummyData)
     }
 
     const fetchUserData = async () => {
+        try {
+         if (user?.publicMetadata?.role === 'seller') {
+            setIsSeller(true)
+
+        }
         setUserData(userDummyData)
+        } catch (error) {
+            console.log(error);
+        }
+   
     }
 
     const addToCart = async (itemId: string) => {
@@ -115,8 +125,11 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
 }
 
     useEffect(() => {
-        fetchProductData()
-    }, [])
+        if (user) {
+
+            fetchProductData()
+        }
+    }, [user])
 
     useEffect(() => {
         fetchUserData()
