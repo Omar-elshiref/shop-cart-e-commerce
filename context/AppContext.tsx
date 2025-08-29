@@ -132,7 +132,7 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
     useEffect(() => {
         if (user) {
 
-            fetchProductData()
+            fetchUserData()
         }
     }, [user])
 
