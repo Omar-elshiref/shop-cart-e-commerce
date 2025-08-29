@@ -2,12 +2,15 @@
 import { productsDummyData, userDummyData } from "@/assets/assets";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState, PropsWithChildren } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { ProductType, User } from "@/interface/Index";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 
 type AppContextValue = {
   user: User | null;
+getToken: () => Promise<string | null>;
   currency: string;
   router: ReturnType<typeof useRouter> | null;
   isSeller: boolean;
@@ -26,6 +29,7 @@ type AppContextValue = {
 
 const defaultValue: AppContextValue = {
   user: null,
+    getToken: async () => null,
   currency: '',
   router: null,
   isSeller: false,
@@ -54,6 +58,8 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
     const router = useRouter()
 
     const { user } = useUser()
+    const { getToken} = useAuth()
+
 
     const [products, setProducts] = useState<ProductType[]>([])
     const [userData, setUserData] = useState<User>()
@@ -71,9 +77,21 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
             setIsSeller(true)
 
         }
+        const token = await getToken()
+        
+        const {data} = await axios.get('/api/user/data', {headers: {Authorization: `Bearer ${token}`}})
+        
+            if (data.seccess) {
+                setUserData(data.user)
+                setCartItems(data.user.cartItems)
+            } else {
+                toast.error(data.message)
+            }
+            
+        
         setUserData(userDummyData)
         } catch (error) {
-            console.log(error);
+            toast.error((error as Error).message)
         }
    
     }
@@ -138,6 +156,7 @@ export const AppContextProvider = (props: PropsWithChildren<{ children: React.Re
 
     const value: AppContextValue = {
         user: user as User | null,
+        getToken,
         currency, router,
         isSeller, setIsSeller,
         userData, fetchUserData,
