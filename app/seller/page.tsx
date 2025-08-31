@@ -2,8 +2,21 @@
 import React, { useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
+import { useAppContext } from "@/context/AppContext";
+import axios from "axios";
+import toast from "react-hot-toast";
 
+/**
+ * AddProduct component
+ * @returns JSX.Element
+ */
 const AddProduct = () => {
+
+  const { getToken } = useAppContext();
+
+  /**
+   * State variables
+   */
   const [files, setFiles] = useState<File[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -11,8 +24,54 @@ const AddProduct = () => {
   const [price, setPrice] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
 
+  /**
+   * Submit handler
+   * @param e React.FormEvent
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("category", category);
+    formData.append("price", price);
+    formData.append("offerPrice", offerPrice);
+
+    // Add images to the formData
+    for (let i = 0; i < files.length; i++) {
+      formData.append("images", files[i]);
+    }
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("User is not authenticated");
+      }
+
+      const { data } = await axios.post('/api/product/add', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        // Reset form fields
+        setFiles([]);
+        setName("");
+        setDescription("");
+        setCategory("Earphone");
+        setPrice("");
+        setOfferPrice("");
+      } else {
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+
   };
 
   return (
@@ -42,7 +101,7 @@ const AddProduct = () => {
                       ? URL.createObjectURL(files[index])
                       : assets.upload_area
                   }
-                  alt=''
+                  alt='upload_area'
                   width={100}
                   height={100}
                 />

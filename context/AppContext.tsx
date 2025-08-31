@@ -1,20 +1,25 @@
-'use client'
+"use client";
 import { productsDummyData, userDummyData } from "@/assets/assets";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useState, PropsWithChildren } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  PropsWithChildren,
+} from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ProductType, User } from "@/interface/Index";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-
 type AppContextValue = {
   user: User | null;
-getToken: () => Promise<string | null>;
+  getToken: () => Promise<string | null>;
   currency: string;
   router: ReturnType<typeof useRouter> | null;
   isSeller: boolean;
-    userData: User | undefined;
+  userData: User | undefined;
   products: ProductType[];
   cartItems: { [key: string]: number };
   setIsSeller: (isSeller: boolean) => void;
@@ -25,12 +30,12 @@ getToken: () => Promise<string | null>;
   addToCart: (productId: string) => Promise<void>;
   getCartCount: () => number;
   getCartAmount: () => number;
-}
+};
 
 const defaultValue: AppContextValue = {
   user: null,
-    getToken: async () => null,
-  currency: '',
+  getToken: async () => null,
+  currency: "",
   router: null,
   isSeller: false,
   userData: userDummyData,
@@ -48,127 +53,230 @@ const defaultValue: AppContextValue = {
 
 export const AppContext = createContext(defaultValue);
 
-export const useAppContext = () => {
-    return useContext(AppContext)
-}
+/**
+ * A hook to access the application context.
+ *
+ * @returns The application context
+ */
+export const useAppContext = (): AppContextValue => {
+  return useContext(AppContext);
+};
 
-export const AppContextProvider = (props: PropsWithChildren<{ children: React.ReactNode }>) => {
+export const AppContextProvider = (
+  props: PropsWithChildren<{ children: React.ReactNode }>
+) => {
+  /**
+   * The currency symbol to use for the application.
+   * Defaults to "USD".
+   */
+  const currency = process.env.NEXT_PUBLIC_CURRENCY ?? "USD";
 
-    const currency = process.env.NEXT_PUBLIC_CURRENCY ?? 'USD'
-    const router = useRouter()
+  /**
+   * The router from the next/navigation package.
+   */
+  const router = useRouter();
 
-    const { user } = useUser()
-    const { getToken} = useAuth()
+  /**
+   * The user details from the Clerk SDK.
+   */
+  const { user } = useUser();
 
+  /**
+   * The function to get the authentication token.
+   */
+  const { getToken } = useAuth();
 
-    const [products, setProducts] = useState<ProductType[]>([])
-    const [userData, setUserData] = useState<User>(false as unknown as User)
-    const [isSeller, setIsSeller] = useState(false)
-    const [cartItems, setCartItems] = useState<{ [key: string]: number }>({})
+  /**
+   * The list of products.
+   */
+  const [products, setProducts] = useState<ProductType[]>([]);
 
-    const fetchProductData = async () => {
-       
-        setProducts(productsDummyData)
+  /**
+   * The user data.
+   */
+  const [userData, setUserData] = useState<User>(false as unknown as User);
+
+  /**
+   * Whether the user is a seller or not.
+   */
+  const [isSeller, setIsSeller] = useState(false);
+
+  /**
+   * The items in the cart.
+   */
+  const [cartItems, setCartItems] = useState<{ [key: string]: number }>({});
+
+  /**
+   * Fetch the products data.
+   */
+  const fetchProductData = async () => {
+    setProducts(productsDummyData);
+  };
+
+  /**
+   * Fetch the user data from the server.
+   *
+   * This function fetches the user data from the server and updates the user
+   * data in the context. It also checks if the user is a seller or not and
+   * updates the context accordingly.
+   */
+  const fetchUserData = async () => {
+    try {
+      // Check if the user is a seller or not
+      if (user?.publicMetadata?.role === "seller") {
+        setIsSeller(true);
+      }
+
+      // Get the authentication token
+      const token = await getToken();
+
+      // Fetch the user data from the server
+      const { data } = await axios.get("/api/user/data", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Check if the response is successful
+      if (data.success) {
+        // Update the user data in the context
+        setUserData(data.user);
+        // Update the cart items in the context
+        setCartItems(data.user.cartItems);
+      } else {
+        // Show an error message if the response is not successful
+        toast.error(data.message);
+      }
+
+      // Set the default user data if the user data is not available
+      setUserData(userDummyData);
+    } catch (error) {
+      // Show an error message if there is an error
+      toast.error((error as Error).message);
+    }
+  };
+
+  /**
+   * Add a product to the cart.
+   *
+   * This function adds a product to the cart by increasing the quantity of the
+   * product in the cart by 1. If the product is not in the cart, it will be added
+   * with a quantity of 1.
+   *
+   * @param itemId The ID of the product to add.
+   */
+  const addToCart = async (itemId: string) => {
+    // Make a deep copy of the cart items
+    const cartData = structuredClone(cartItems);
+
+    // If the product is already in the cart, increase the quantity by 1
+    if (cartData[itemId]) {
+      cartData[itemId] += 1;
+    } else {
+      // If the product is not in the cart, add it with a quantity of 1
+      cartData[itemId] = 1;
     }
 
-    const fetchUserData = async () => {
-        try {
-         if (user?.publicMetadata?.role === 'seller') {
-            setIsSeller(true)
+    // Update the cart items in the context
+    setCartItems(cartData);
+  };
 
-        }
-        const token = await getToken()
-        
-        const {data} = await axios.get('/api/user/data', {headers: {Authorization: `Bearer ${token}`}})
-        
-            if (data.seccess) {
-                setUserData(data.user)
-                setCartItems(data.user.cartItems)
-            } else {
-                toast.error(data.message)
-            }
-            
-        
-        setUserData(userDummyData)
-        } catch (error) {
-            toast.error((error as Error).message)
-        }
-   
+  /**
+   * Update the quantity of a product in the cart.
+   *
+   * This function updates the quantity of a product in the cart. If the quantity
+   * is 0, the product will be removed from the cart.
+   *
+   * @param itemId The ID of the product to update.
+   * @param quantity The new quantity of the product. If the quantity is 0, the
+   * product will be removed from the cart.
+   */
+  const updateCartQuantity = async (itemId: string, quantity: number) => {
+    // Make a deep copy of the cart items
+    const cartData = structuredClone(cartItems);
+
+    // If the quantity is 0, remove the product from the cart
+    if (quantity === 0) {
+      delete cartData[itemId];
+    } else {
+      // If the quantity is greater than 0, update the quantity of the product in the cart
+      cartData[itemId] = quantity;
     }
 
-    const addToCart = async (itemId: string) => {
+    // Update the cart items in the context
+    setCartItems(cartData);
+  };
 
-        const cartData = structuredClone(cartItems);
-        if (cartData[itemId]) {
-            cartData[itemId] += 1;
-        }
-        else {
-            cartData[itemId] = 1;
-        }
-        setCartItems(cartData);
-
-    }
-
-    const updateCartQuantity = async (itemId: string, quantity: number) => {
-
-        const cartData = structuredClone(cartItems);
-        if (quantity === 0) {
-            delete cartData[itemId];
-        } else {
-            cartData[itemId] = quantity;
-        }
-        setCartItems(cartData)
-
-    }
-
-    const getCartCount = () => {
-        let totalCount = 0;
-        for (const items in cartItems) {
-            if (cartItems[items] > 0) {
-                totalCount += cartItems[items];
-            }
-        }
-        return totalCount;
-    }
-
-  const getCartAmount = () => {
-    let totalAmount = 0;
+  /**
+   * Get the total number of items in the cart.
+   *
+   * This function loops through the cart items and adds up the quantity of each
+   * item. It returns the total count of items in the cart.
+   */
+  const getCartCount = (): number => {
+    let totalCount = 0;
+    // Loop through the cart items
     for (const items in cartItems) {
-        const itemInfo = products.find((product) => product._id === items);
-        if (itemInfo && cartItems[items] > 0) {
-            totalAmount += itemInfo.offerPrice * cartItems[items];
-        }
+      // If the quantity of the item is greater than 0, add it to the total count
+      if (cartItems[items] > 0) {
+        totalCount += cartItems[items];
+      }
     }
+    // Return the total count
+    return totalCount;
+  };
+
+  /**
+   * Get the total amount of the items in the cart.
+   *
+   * This function loops through the cart items and multiplies the quantity of each
+   * item by its offer price. It returns the total amount of the items in the cart.
+   */
+  const getCartAmount = (): number => {
+    let totalAmount = 0;
+    // Loop through the cart items
+    for (const items in cartItems) {
+      // Get the product info of the item
+      const itemInfo = products.find((product) => product._id === items);
+      // If the item is found and the quantity is greater than 0
+      if (itemInfo && cartItems[items] > 0) {
+        // Add the amount of the item to the total amount
+        totalAmount += itemInfo.offerPrice * cartItems[items];
+      }
+    }
+
+    // Return the total amount with 2 decimal places
     return Math.floor(totalAmount * 100) / 100;
-}
+  };
 
-    useEffect(() => {
-        fetchProductData();
-        
-    }, [])
+  useEffect(() => {
+    fetchProductData();
+  }, []);
 
-    useEffect(() => {
-        if (user) {
-
-            fetchUserData()
-        }
-    }, [user])
-
-    const value: AppContextValue = {
-        user: user as User | null,
-        getToken,
-        currency, router,
-        isSeller, setIsSeller,
-        userData, fetchUserData,
-        products, fetchProductData,
-        cartItems, setCartItems,
-        addToCart, updateCartQuantity,
-        getCartCount, getCartAmount
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
     }
+  }, [user]);
 
-    return (
-        <AppContext.Provider value={value}>
-            {props.children}
-        </AppContext.Provider>
-    )
-}
+  const value: AppContextValue = {
+    user: user as User | null,
+    getToken,
+    currency,
+    router,
+    isSeller,
+    setIsSeller,
+    userData,
+    fetchUserData,
+    products,
+    fetchProductData,
+    cartItems,
+    setCartItems,
+    addToCart,
+    updateCartQuantity,
+    getCartCount,
+    getCartAmount,
+  };
+
+  return (
+    <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
+  );
+};
