@@ -93,7 +93,7 @@ export async function POST(request) {
         });
 
         // Return the new product
-        return NextResponse.json({ success: true, product: newProduct });
+        return NextResponse.json({ success: true, product: newProduct, message: "Product added successfully" });
        
     } catch (error) {
         console.log(error);
