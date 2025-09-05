@@ -8,12 +8,12 @@ import { NextResponse } from "next/server";
  * @param {Request} request - The request object containing the cart data to be updated.
  * @returns {Promise<NextResponse>} - A promise that resolves to a NextResponse object with a JSON response.
  */
-export async function post(request) {
+export async function POST(request) {
     try {
         const { userId } = getAuth(request);
 
         // Get the cart data from the request body
-        const {cartData} = await request.json();
+        const { cartData } = await request.json();
 
         // Connect to the database
         await connectDB();
@@ -25,7 +25,7 @@ export async function post(request) {
         user.cartItems = cartData;
 
         // Save the updated user to the database
-      await  user.save();
+        await user.save();
 
         // Return a success response with the updated cart data
         return NextResponse.json({
@@ -37,6 +37,5 @@ export async function post(request) {
         console.log(error);
         // Return an error response with the error message
         return NextResponse.json({ success: false, message: error.message });
-        
     }
 }
