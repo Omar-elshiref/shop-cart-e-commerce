@@ -1,27 +1,81 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { assets, productsDummyData } from "@/assets/assets";
+import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
 import { ProductType } from "@/interface/Index";
+import axios from "axios";
+import toast from "react-hot-toast";
 
+/**
+ * @description
+ * This component is used to display all products of a seller.
+ */
 const ProductList = () => {
 
-  const { router } = useAppContext()
+  /**
+   * @description
+   * Get the router, getToken and user from the AppContext.
+   */
+  const { router, getToken, user } = useAppContext()
 
+  /**
+   * @description
+   * Set the initial state for products.
+   * @type {ProductType[]}
+   */
   const [products, setProducts] = useState<ProductType[]>([])
+
+  /**
+   * @description
+   * Set the initial state for loading.
+   * @type {boolean}
+   */
   const [loading, setLoading] = useState(true)
 
-  const fetchSellerProduct = async () => {
-    setProducts(productsDummyData)
-    setLoading(false)
-  }
+  /**
+   * @description
+   * Fetch products from the API.
+   * 
+   * This function fetches the products of the seller from the API and updates the state.
+   * If the response is successful, it sets the products state to the products received from the API.
+   * If the response is not successful, it shows an error message.
+   * @returns {void}
+   */
+  const fetchSellerProduct = React.useCallback(async () => {
+    try {
+      const token = getToken()
+      const {data} = await axios.get('/api/product/seller-list', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      if(data?.success) {
+        // Set the products state to the products received from the API
+        setProducts(data?.products)
+        setLoading(false)
+      } else {
+        // Show an error message if the response is not successful
+        toast.error(data?.message)
+      }
+    } catch (error) {
+      // Show an error message if there is an error
+      toast.error("fetchSellerProduct error")
+      console.log("fetchSellerProduct error", error);
+    }
+  }, [getToken])
 
+  /**
+   * @description
+   * Fetch products when the component mounts and when the user changes.
+   */
   useEffect(() => {
-    fetchSellerProduct();
-  }, [])
+    if(user) {
+      fetchSellerProduct();
+    }
+  }, [user, fetchSellerProduct])
 
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between">
