@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
  * @param {Request} request - The request object containing the cart data to be updated.
  * @returns {Promise<NextResponse>} - A promise that resolves to a NextResponse object with a JSON response.
  */
-export async function Post(request) {
+export async function post(request) {
     try {
         const { userId } = getAuth(request);
 
