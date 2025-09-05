@@ -47,7 +47,7 @@ const ProductList = () => {
   const fetchSellerProduct = React.useCallback(async () => {
     try {
       const token = getToken()
-      const {data} = await axios.get('/api/product/seller-list', {
+      const { data } = await axios.get('/api/product/seller-list', {
         headers: {
           Authorization: `Bearer ${token}`
         }

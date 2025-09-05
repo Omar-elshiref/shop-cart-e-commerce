@@ -107,10 +107,32 @@ export const AppContextProvider = (
   const [cartItems, setCartItems] = useState<{ [key: string]: number }>({});
 
   /**
-   * Fetch the products data.
+   * Fetch the products data from the server.
+   *
+   * This function fetches the list of products from the server and updates the
+   * products state in the context. If the response is successful, it sets the
+   * products state to the products received from the server. If the response is
+   * not successful, it shows an error message.
+   *
+   * @returns {void}
    */
-  const fetchProductData = async () => {
-    setProducts(productsDummyData);
+  const fetchProductData = async (): Promise<void> => {
+    try {
+      // Fetch the list of products from the server
+      const { data } = await axios.get('/api/product/list');
+
+      // If the response is successful, set the products state to the products received from the server
+      if (data?.success) {
+        setProducts(data?.products);
+      } else {
+        // Otherwise, show an error message
+        toast.error(data?.message);
+      }
+    } catch (error) {
+      // If there is an error, show an error message
+      toast.error((error as Error).message);
+      console.log("fetchProductData error", error);
+    }
   };
 
   /**
@@ -177,6 +199,20 @@ export const AppContextProvider = (
 
     // Update the cart items in the context
     setCartItems(cartData);
+    if (user) {
+      try {
+        const token = await getToken();
+        await axios.post('/api/cart/update', { cartData }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+    toast.success("Product added to cart");
+
+      } catch (error) {
+        toast.error((error as Error).message);
+        
+      }
+
+    }
   };
 
   /**
@@ -203,6 +239,20 @@ export const AppContextProvider = (
 
     // Update the cart items in the context
     setCartItems(cartData);
+    if (user) {
+      try {
+        const token = await getToken();
+        await axios.post('/api/cart/update', { cartData }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+    toast.success("cart updated");
+
+      } catch (error) {
+        toast.error((error as Error).message);
+        
+      }
+
+    }
   };
 
   /**
