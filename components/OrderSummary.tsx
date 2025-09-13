@@ -1,18 +1,37 @@
-import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
 import { addressDummyDataType } from "@/interface/Index";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount } = useAppContext()
+  const { currency, router, getCartCount, getCartAmount, getToken, user, cartItems, setCartItems } = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState<addressDummyDataType | null>(null);;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [userAddresses, setUserAddresses] = useState<addressDummyDataType[]>([]);;
 
   const fetchUserAddresses = async () => {
-    setUserAddresses(addressDummyData);
+   try {
+    const token = await getToken();
+    const {data} = await axios.get('/api/user/get-address', { headers: { Authorization: `Bearer ${token}` } });
+
+  if (data?.success) {
+    setUserAddresses(data.addresses);
+    if (data.addresses.length > 0) {
+      setSelectedAddress(data.addresses[0]);
+    }
+  } else {
+    toast.error(data?.message || "Failed to fetch addresses");
+  }
+
+  } catch (error) {
+    console.log(error);
+    const message = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Something went wrong';
+    toast.error(message);
+    
+   }
   }
 
   const handleAddressSelect = (address: addressDummyDataType) => {
@@ -25,8 +44,11 @@ const OrderSummary = () => {
   }
 
   useEffect(() => {
-    fetchUserAddresses();
-  }, [])
+    if (user) {
+      fetchUserAddresses();
+
+    }
+  }, [user])
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">
