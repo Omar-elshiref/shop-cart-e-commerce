@@ -67,6 +67,44 @@ const ProductList = () => {
     }
   }, [getToken])
 
+
+  /**
+   * Deletes a product from the API.
+   * 
+   * This function deletes a product from the API by its ID.
+   * If the response is successful, it shows a success message and filters the deleted product from the products state.
+   * If the response is not successful, it shows an error message.
+   * 
+   * @param {string} productId The ID of the product to delete.
+   * @returns {Promise<void>}
+   */
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      const token = getToken();
+      const { data } = await axios.delete(`/api/product/${productId}`, {
+        headers: {
+          Authorization: `bearer ${token}`,
+        },
+      });
+      if (data?.success) {
+        // Show a success message if the response is successful
+        toast.success("product deleted successfully");
+        // Filter the deleted product from the products state
+        setProducts((prev) => prev.filter((p) => p._id !== productId));
+      } else {
+        // Show an error message if the response is not successful
+        toast.error(data?.message || "error deleting product");
+      }
+    } catch (error) {
+      // Show an error message if there is an error
+      toast.error("error deleting product");
+      console.error("handleDeleteProduct error", error);
+    }
+  };
+
+
+
+
   /**
    * @description
    * Fetch products when the component mounts and when the user changes.
@@ -112,7 +150,7 @@ const ProductList = () => {
                   </td>
                   <td className="px-4 py-3 max-sm:hidden">{product.category}</td>
                   <td className="px-4 py-3">${product.offerPrice}</td>
-                  <td className="px-4 py-3 max-sm:hidden">
+                  <td className="px-4 py-3 max-sm:hidden flex">
                     <button onClick={() => router?.push(`/product/${product._id}`)} className="flex items-center gap-1 px-1.5 md:px-3.5 py-2 bg-orange-600 text-white rounded-md">
                       <span className="hidden md:block">Visit</span>
                       <Image
@@ -120,6 +158,12 @@ const ProductList = () => {
                         src={assets.redirect_icon}
                         alt="redirect_icon"
                       />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product._id)}
+                      className="flex items-center gap-1 px-2 py-2 bg-red-600 text-white rounded-md ml-2"
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
