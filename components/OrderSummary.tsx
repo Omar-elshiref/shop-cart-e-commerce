@@ -15,7 +15,7 @@ const OrderSummary = () => {
   const fetchUserAddresses = async () => {
    try {
     const token = await getToken();
-    
+
     const {data} = await axios.get('/api/user/get-address', { headers: { Authorization: `Bearer ${token}` } });
 
   if (data?.success) {
@@ -58,7 +58,7 @@ const OrderSummary = () => {
       const token = await getToken();
 
       const {data} = await axios.post('/api/order/create', {
-        addressId: selectedAddress?._id,
+        address: selectedAddress?._id,
         items: cartItmesArray,
       }, {
         headers: { Authorization: `Bearer ${token}` }

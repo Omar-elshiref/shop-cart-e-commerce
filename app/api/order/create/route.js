@@ -23,15 +23,6 @@ export async function POST(request) {
         },0)
 
 
-           // Fetch address from DB
-        // const Address = (await import("../../../../models/Address.js")).default;
-        // const addressDoc = await Address.findById(addressId);
-        // if (!addressDoc) {
-        //     return NextResponse.json({ success: false, message: "Address not found" });
-        // }
-        // const address = addressDoc.toObject();
-
-
 
         await inngest.send({
             name: "order/created",
