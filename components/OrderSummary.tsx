@@ -1,5 +1,5 @@
 import { useAppContext } from "@/context/AppContext";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { addressDummyDataType } from "@/interface/Index";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -15,6 +15,7 @@ const OrderSummary = () => {
   const fetchUserAddresses = async () => {
    try {
     const token = await getToken();
+    
     const {data} = await axios.get('/api/user/get-address', { headers: { Authorization: `Bearer ${token}` } });
 
   if (data?.success) {
@@ -64,7 +65,7 @@ const OrderSummary = () => {
       })
 
       if (data?.success) {
-        toast.success(data?.message || "Order placed successfully");
+        toast.success(data?.message);
         setCartItems({});
         router?.push(`/order-placed`);
       } else {

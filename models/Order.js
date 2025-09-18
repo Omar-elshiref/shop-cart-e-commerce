@@ -11,9 +11,9 @@ const orderSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   address: { type: String, required: true, ref: "address" },
   status: { type: String, default: "order placed", required: true },
-  data: { type: Number, required: true },
+  date: { type: Number, required: true },
 });
 
-const Order = mongoose.models.Order || mongoose.model("order", orderSchema);
+const Order = mongoose.models.order || mongoose.model("order", orderSchema);
 
 export default Order;
